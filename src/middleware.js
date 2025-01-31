@@ -1,19 +1,37 @@
-import { NextResponse } from 'next/server'
+// import { NextResponse } from 'next/server'
 
-// This function can be marked `async` if using `await` inside
-export function middleware(request) {
+import { getToken } from "next-auth/jwt"
+import { NextResponse } from "next/server";
 
-    const currentCookie = request.cookies.get('nextjs-token')
-    console.log(currentCookie.value)
-    const dummyUserData = {
-        role: "user",
-        email: "test@admin.com"
+// // This function can be marked `async` if using `await` inside
+// export function middleware(request) {
+
+//     const currentCookie = request.cookies.get('nextjs-token')
+//     // console.log(currentCookie)
+//     const dummyUserData = {
+//         role: "user",
+//         email: "test@admin.com"
+//     }
+
+//     let isServicesPage = request.nextUrl.pathname.startsWith("/services")
+//     let isAdmin = dummyUserData.role == "admin"
+
+//     if (isServicesPage && !isAdmin)
+//         return NextResponse.redirect(new URL('/login', request.url))
+//     return NextResponse.next()
+// }
+
+
+export const middleware = async (req) => {
+    const token = await getToken({ req });
+    // if (token) console.log("FROM MIDDLEWARE", token)
+    const isTokenOk = Boolean(token)
+    const isAdminUser = token?.role == 'admin'
+    const isAdminSpecificRoute = req.nextUrl.pathname.startsWith("/dashboard");
+
+    if(isAdminSpecificRoute && !isAdminUser){
+        return NextResponse.redirect(new URL("/api/auth/signin", req.url))
     }
 
-    let isServicesPage = request.nextUrl.pathname.startsWith("/services")
-    let isAdmin = dummyUserData.role == "admin"
-
-    if (isServicesPage && !isAdmin)
-        return NextResponse.redirect(new URL('/login', request.url))
     return NextResponse.next()
 }

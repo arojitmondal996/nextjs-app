@@ -1,7 +1,19 @@
+import Link from "next/link";
 import MealSearchInput from "./components/MealSearchInput";
+import Image from "next/image";
+import { Roboto } from "next/font/google";
 
+const roboto = Roboto({
+    weight: ["100", "300", "400", "500", "700", "900"],
+    subsets: ["latin"],
+})
 
-const MealsPage = async ({searchParams}) => {
+export const metadata = {
+    title: "All Meals",
+    description: "Meal is loaded",
+};
+
+const MealsPage = async ({ searchParams }) => {
     const query = await searchParams;
 
     const fetchMeals = async () => {
@@ -12,7 +24,7 @@ const MealsPage = async ({searchParams}) => {
             return data.meals;
         } catch (error) {
             console.log(error)
-            return []
+            return [];
         }
     };
 
@@ -21,13 +33,15 @@ const MealsPage = async ({searchParams}) => {
     return (
         <div>
             <div className='grid grid-cols-4 gap-4'>
-                <MealSearchInput/>
+                <MealSearchInput />
                 {
                     meals?.map((singleMeal) => {
                         return (
-                            <div>
+                            <div key={singleMeal?.idMeal} className={roboto.className}>
+                                <Image src={singleMeal?.strMealThumb} width={640} height={640} alt={singleMeal?.strMeal}></Image>
                                 <p>{singleMeal?.strMeal}</p>
                                 <p>{singleMeal?.strInstructions}</p>
+                                <Link href={`/meals/${singleMeal.idMeal}`}>Details</Link>
                             </div>
                         )
                     })
